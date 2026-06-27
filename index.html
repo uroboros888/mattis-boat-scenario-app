@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mattis | Сценарии достройки катеров</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css?v=20260626-configurator-4">
+  </head>
+  <body>
+    <main class="app-shell" id="appShell" data-active-view="scenario">
+      <section class="topbar" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Mattis / модель финансирования</p>
+          <h1 id="page-title">Сценарии достройки катеров</h1>
+        </div>
+        <label class="budget-control">
+          <span>Бюджет</span>
+          <input id="budgetInput" inputmode="numeric" autocomplete="off" value="100 000 000">
+        </label>
+      </section>
+
+      <div class="scenario-switcher" aria-label="Переключение сценариев и настроек">
+        <nav class="scenario-tabs" id="scenarioTabs" aria-label="Сценарии"></nav>
+
+        <section class="scenario-options" aria-label="Глобальные настройки расчета">
+          <label class="switch-control">
+            <input id="includeRentUtilities" type="checkbox" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+            <span>
+              <strong>Аренда и К.У.</strong>
+              <em>Учитывать в сценариях</em>
+            </span>
+          </label>
+          <label class="switch-control">
+            <input id="includeBoat5" type="checkbox" checked>
+            <span class="switch-ui" aria-hidden="true"></span>
+            <span>
+              <strong>Катер 5</strong>
+              <em>Учитывать все связанные затраты</em>
+            </span>
+          </label>
+          <div class="sales-layer-control">
+            <div>
+              <strong>Сценарий продаж</strong>
+              <em id="salesLayerNote"></em>
+            </div>
+            <div class="sales-layer-tabs" id="salesScenarioTabs" aria-label="Сценарий продаж">
+              <button class="active" type="button" data-sale-scenario="none">Без продаж</button>
+              <button type="button" data-sale-scenario="presentation">План продаж</button>
+              <button type="button" data-sale-scenario="manual">Ручной</button>
+            </div>
+          </div>
+        </section>
+        <nav class="view-tabs" id="viewTabs" aria-label="Режим просмотра">
+          <button class="active" type="button" data-app-view="scenario">Расчет сценария</button>
+          <button type="button" data-app-view="configurator">Конфигуратор</button>
+          <button type="button" data-app-view="comparison">Сравнение сценариев</button>
+        </nav>
+      </div>
+
+      <section class="scenario-header scenario-view-section" aria-live="polite">
+        <div>
+          <h2 id="scenarioTitle"></h2>
+          <p id="scenarioNote"></p>
+        </div>
+        <div class="status-pill" id="budgetStatus"></div>
+      </section>
+
+      <section class="kpi-grid scenario-view-section" id="kpiGrid" aria-label="Ключевые показатели"></section>
+
+      <section class="panel scenario-view-section" aria-labelledby="overallTitle">
+        <div class="section-heading compact">
+          <h2 id="overallTitle">Общий сводник</h2>
+        </div>
+        <div class="summary-grid" id="overallSummary"></div>
+        <div class="table-scroll summary-table">
+          <table id="overallTable"></table>
+        </div>
+      </section>
+
+      <section class="panel scenario-view-section" aria-labelledby="salesTitle">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Продажи</p>
+            <h2 id="salesTitle">Поступления и потребность после продаж</h2>
+          </div>
+        </div>
+        <div class="sales-grid">
+          <div class="sale-assumptions" id="saleAssumptions"></div>
+          <div class="sales-metrics" id="salesMetrics"></div>
+        </div>
+        <div class="table-scroll compact-table">
+          <table id="salesTable"></table>
+        </div>
+      </section>
+
+      <section class="panel presentation-panel scenario-view-section" aria-labelledby="presentationTimelineTitle">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">График реализации</p>
+            <h2 id="presentationTimelineTitle">Проекты и ключевые решения</h2>
+          </div>
+        </div>
+        <div class="presentation-scroll">
+          <div class="presentation-timeline" id="presentationTimeline"></div>
+        </div>
+        <div class="timeline-notes" id="timelineNotes"></div>
+      </section>
+
+      <section class="main-visual scenario-view-section" aria-labelledby="ganttTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">План-график</p>
+            <h2 id="ganttTitle">Активность по месяцам</h2>
+          </div>
+          <div class="legend" id="ganttLegend"></div>
+        </div>
+        <div class="gantt-wrap">
+          <div class="gantt-grid" id="ganttGrid"></div>
+        </div>
+      </section>
+
+      <section class="two-column scenario-view-section">
+        <div class="panel" aria-labelledby="monthlyTitle">
+          <div class="section-heading compact">
+            <h2 id="monthlyTitle">Помесячный расход</h2>
+          </div>
+          <div class="bar-chart" id="monthlyChart"></div>
+          <div class="expense-legend" id="monthlyGroupLegend"></div>
+        </div>
+
+        <div class="panel" aria-labelledby="mixTitle">
+          <div class="section-heading compact">
+            <h2 id="mixTitle">Структура будущих затрат</h2>
+          </div>
+          <div class="mix-bars" id="mixBars"></div>
+        </div>
+      </section>
+
+      <section class="scenario-views scenario-view-section" aria-label="Структура затрат и загрузка ресурсов">
+        <div class="panel" aria-labelledby="monthlyObjectsTitle">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Структура</p>
+              <h2 id="monthlyObjectsTitle">Месячные затраты по объектам</h2>
+            </div>
+          </div>
+          <div class="stacked-bars" id="monthlyStackedBars"></div>
+          <div class="section-legend" id="sectionLegend"></div>
+        </div>
+
+        <div class="panel" aria-labelledby="brigadeLoadTitle">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Ресурс</p>
+              <h2 id="brigadeLoadTitle">Загрузка бригад по месяцам</h2>
+            </div>
+          </div>
+          <div class="brigade-heatmap" id="brigadeHeatmap"></div>
+        </div>
+      </section>
+
+      <section class="panel configurator-panel configurator-view-section" aria-labelledby="configuratorTitle">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Конфигуратор</p>
+            <h2 id="configuratorTitle">Кастомный сценарий</h2>
+          </div>
+          <button class="secondary-action" id="customResetButton" type="button">Сбросить к шаблону</button>
+        </div>
+        <div class="custom-config-summary" id="customConfigSummary"></div>
+        <div class="custom-config-grid">
+          <div class="custom-config-card">
+            <span>Шаблон</span>
+            <label>
+              <strong>Базовый сценарий</strong>
+              <select id="customBaseScenario"></select>
+            </label>
+          </div>
+          <div class="custom-config-card">
+            <span>Катера</span>
+            <div class="custom-toggle-grid" id="customBoatToggles"></div>
+          </div>
+          <div class="custom-config-card">
+            <span>Постоянные расходы</span>
+            <div class="custom-toggle-grid" id="customFixedToggles"></div>
+          </div>
+          <div class="custom-config-card wide">
+            <span>Коэффициенты затрат</span>
+            <div class="custom-multiplier-grid" id="customMultipliers"></div>
+          </div>
+        </div>
+
+        <details class="config-subdetails" open>
+          <summary>
+            <span>Расписание блоков</span>
+            <strong>Старт и длительность</strong>
+          </summary>
+          <div class="table-scroll compact-table">
+            <table id="customScheduleTable"></table>
+          </div>
+        </details>
+
+        <details class="config-subdetails" open>
+          <summary>
+            <span>ФОТ по сотрудникам</span>
+            <strong>Включение и месяцы</strong>
+          </summary>
+          <div class="payroll-config-actions">
+            <div class="mode-toggle" id="payrollModeTabs" aria-label="Режим настройки ФОТ">
+              <button class="active" type="button" data-payroll-mode="model">Модельный ФОТ</button>
+              <button type="button" data-payroll-mode="manual">Ручной штат</button>
+            </div>
+            <button class="secondary-action" id="payrollResetButton" type="button">Сбросить штат</button>
+          </div>
+          <p class="payroll-config-note" id="payrollConfigNote"></p>
+        <div class="table-scroll payroll-config-scroll">
+          <table id="payrollConfigTable"></table>
+        </div>
+        </details>
+      </section>
+
+      <section class="panel payroll-panel scenario-view-section" aria-labelledby="payrollTitle">
+        <details id="payrollDetails">
+          <summary>
+            <span>
+              <p class="eyebrow">ФОТ</p>
+              <h2 id="payrollTitle">Общий ФОТ сценария</h2>
+            </span>
+            <strong id="payrollSummaryTotal"></strong>
+          </summary>
+          <div class="payroll-content">
+            <div class="payroll-summary-grid" id="payrollSummary"></div>
+            <div class="payroll-breakdown" id="payrollBreakdown"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel scenario-view-section" aria-labelledby="cumulativeTitle">
+        <div class="section-heading compact">
+          <h2 id="cumulativeTitle">Накопительная потребность по месяцам</h2>
+          <div class="mode-toggle" id="cumulativeModeTabs" aria-label="Режим накопительной потребности">
+            <button type="button" data-cumulative-mode="total">Общая</button>
+            <button type="button" data-cumulative-mode="period">Новый период</button>
+          </div>
+        </div>
+        <div class="cumulative-grid">
+          <div class="cumulative-chart" id="cumulativeChart"></div>
+          <div class="table-scroll compact-table">
+            <table id="cumulativeTable"></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel comparison-view-section comparison-panel" aria-labelledby="compareTitle">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Сравнение</p>
+            <h2 id="compareTitle">Сравнение сценариев</h2>
+          </div>
+          <p id="comparisonContext" class="comparison-context"></p>
+        </div>
+        <div class="comparison-summary-grid" id="comparisonSummary"></div>
+        <div class="table-scroll comparison-table-scroll">
+          <table id="comparisonTable"></table>
+        </div>
+      </section>
+
+      <section class="panel scenario-view-section" aria-labelledby="detailsTitle">
+        <div class="section-heading compact">
+          <h2 id="detailsTitle">Детализация затрат</h2>
+        </div>
+        <div class="table-scroll">
+          <table id="detailsTable"></table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./scenarios-data.js?v=20260626-configurator-4"></script>
+    <script src="./app.js?v=20260626-configurator-4"></script>
+  </body>
+</html>
